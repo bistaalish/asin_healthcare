@@ -36,17 +36,20 @@
                         Our team includes experienced professionals and individuals with firsthand experience, all dedicated to creating a supportive environment.</p>
                     <!-- <a href="#features" class="main-button-slider">Discover More</a> -->
                     {% if not user.is_authenticated %}    
-                        <a href="{% url 'basic:login' %}" class="main-button-slider" data-toggle="modal" data-target="#loginModal" style="border-radius: 5px; margin-right: 10px; padding: 16px 60px;">Login</a>
-                        <a href="{% url 'basic:register' %}" class="main-button-slider" data-toggle="modal" data-target="#registerModal" style="border-radius: 5px; margin-right: 10px; padding: 16px 60px;">Register</a>
+                        <a href="{% url 'basic:login' %}" class="main-button-slider" data-toggle="modal" data-target="#loginModal" style="border-radius: 5px; margin-right: 10px; padding: 16px 60px;" id="login_btn">Login</a>
+                        <a href="{% url 'basic:register' %}" class="main-button-slider" data-toggle="modal" data-target="#registerModal" style="border-radius: 5px; margin-right: 10px; padding: 16px 60px;" id="register_btn">Register</a>
                     
                     {% elif bought_all%}
-                        <h5> <span class="badge badge-info">You already have bought all !!</span> </h5>
+                        <h5> <span class="badge badge-info" style="background-color: rgb(189, 155, 71);">You already have bought all products !!</span> </h5>
 
                     {% else %}
-                        {% with product_id=0 %}
-                        <a href="{% url 'basic:buy_product' product_id %}" class="main-button-slider" style="border-radius: 5px; margin-right: 10px; padding: 16px 60px;">Buy All</a>
-
-                        {% endwith %}
+                        {% if not prev_purchases %}
+                            {% with product_id=0 %}
+                            <a href="{% url 'basic:buy_product' product_id %}" data-toggle="modal" data-target="#buyProductModal" data-product-id="0" class="main-button-slider buy_product_btn" style="border-radius: 5px; margin-right: 10px; padding: 16px 60px;">Buy All</a>
+                            {% endwith %}
+                        {% else %}
+                            <a href="{% url 'payment_support:create_allpayment' %}" class="main-button-slider buy_product_btn" style="border-radius: 5px; margin-right: 10px; padding: 16px 60px;">Buy All</a>
+                        {% endif %}
                     {% endif %}
 
                 </div>
@@ -61,6 +64,8 @@
 
 {% include 'basic/login.html' %}
 {% include 'basic/register.html' %}
+{% include 'basic/buy_product.html' %}
+
 
 <!-- ************************************************ -->
 
@@ -121,8 +126,11 @@
                         
                         {% elif user.is_authenticated %}
                             {% if product.id == next_allow_product %}
-                               <a href="{% url 'basic:buy_product' product.id %}" class="main-button-slider">Buy product</a>
-                    
+                                {% if not prev_purchases %}
+                                   <a href="{% url 'basic:buy_product' product.id %}" data-toggle="modal" data-target="#buyProductModal" data-product-id="{{ product.id }}" class="main-button-slider buy_product_btn">Buy product</a>
+                                {% else %}
+                                    <a href="{% url 'payment_support:create_payment' product.id %}" class="main-button-slider buy_product_btn">Buy product</a>
+                                {% endif %}
                             {% else %}
                                 <h6> <span style="color: #2d3030;"> buy previous product first or buy all </span> </h6>
                             {% endif %}
@@ -250,32 +258,5 @@
         </div>
     </section>
 
-
-<!-- for buy_product form -->
-
-<script>
-
-    // handling alert message 
-    // Automatically close the success alert after 2 seconds
-    document.addEventListener("DOMContentLoaded", function () {
-        var successAlert = document.getElementById("success-alert");
-        if (successAlert) {
-            setTimeout(function () {
-                successAlert.classList.remove("show");
-            }, 4000); // Adjust the time in milliseconds (e.g., 2000ms = 2 seconds)
-        }
-    });
-
-    // Automatically close the failure alert after 5 seconds
-    document.addEventListener("DOMContentLoaded", function () {
-        var failureAlert = document.getElementById("failure-alert");
-        if (failureAlert) {
-            setTimeout(function () {
-                failureAlert.classList.remove("show");
-            }, 4000); // Adjust the time in milliseconds (e.g., 2000ms = 2 seconds)
-        }
-    });
-
-</script>
 
 {% endblock %}

@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from payment_support.models import Product, Purchase
 from payment_support.helpers import get_object_or_none
-
+from django.http import JsonResponse
 
 
 def about_us_view(request):
@@ -75,7 +75,9 @@ def login_request(request):
     return redirect("basic:home")
 
 
+# --- remove --
 def buy_product_view(request, product_id):
+    print("==================================== buy product view =========================================")
     prev_purchase = get_object_or_none(Purchase, buyer=request.user)
     
     # if already purchased once, skip buy product form
@@ -87,10 +89,23 @@ def buy_product_view(request, product_id):
 
     # else redirect to the buy product form
     # if single product
-    elif product_id != 0:
-        selected_product = Product.objects.get(pk=product_id)
-        return render(request, 'basic/buy_product.html', context={"product": selected_product})
-    # if buy all
-    else:
+    # elif product_id != 0:
+    #     selected_product = Product.objects.get(pk=product_id)
+    #     return render(request, 'basic/buy_product.html', context={"product": selected_product})
+    # # if buy all
+    # else:
+    #     product_price = sum([product.price for product in Product.objects.all()])
+    #     return render(request, 'basic/buy_product.html', context={"product_price": product_price})
+
+
+
+def get_product_price(request):
+    product_id = int(request.GET.get('product_id'))
+    
+    if product_id == 0:
         product_price = sum([product.price for product in Product.objects.all()])
-        return render(request, 'basic/buy_product.html', context={"product_price": product_price})
+        return JsonResponse({'price': product_price})
+    
+    else:
+        product = Product.objects.get(pk=product_id)
+        return JsonResponse({'price': product.price})
